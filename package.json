@@ -1,7 +1,6 @@
 {
   "name": "w1_demo",
   "version": "1.0.1",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,5 +15,14 @@
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "mongoose": "^7.0.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elijah-Fabon/comp2537-w23-w1-demo-master.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Elijah-Fabon/comp2537-w23-w1-demo-master/issues"
+  },
+  "homepage": "https://github.com/Elijah-Fabon/comp2537-w23-w1-demo-master#readme",
+  "description": ""
 }
