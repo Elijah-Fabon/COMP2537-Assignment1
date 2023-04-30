@@ -58,7 +58,7 @@ app.post('/login', async (req, res) => {
       req.session.GLOBAL_AUTHENTICATED = true;
       req.session.loggedUsername = req.body.username;
       req.session.loggedPassword = req.body.password;
-      res.redirect('/');
+      res.redirect('/protectedRoute');
     } else {
       res.send('wrong password')
     }
