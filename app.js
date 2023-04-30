@@ -13,7 +13,7 @@ dotenv.config();
 
 var dbStore = new MongoDBStore({
   // uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
-  uri: `mongodb+srv://${process.env.ATLAS_DB_USER}:${process.env.ATLAS_DB_PASSWORD}@cluster0.i5ixake.mongodb.net/comp2537w1?retryWrites=true&w=majority`,
+  uri: `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOST}/${process.env.MONGODB_DATABASE}?retryWrites=true&w=majority`,
   collection: 'mySessions'
 });
 
