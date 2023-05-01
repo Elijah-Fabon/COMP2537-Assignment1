@@ -12,17 +12,28 @@ var MongoDBStore = require('connect-mongodb-session')(session);
 const dotenv = require('dotenv');
 dotenv.config();
 
+/* secret information section */
+const mongodb_host = process.env.MONGODB_HOST;
+const mongodb_user = process.env.MONGODB_USER;
+const mongodb_password = process.env.MONGODB_PASSWORD;
+const mongodb_database = process.env.MONGODB_DATABASE;
+const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
+const node_session_secret = process.env.NODE_SESSION_SECRET;
+/* END secret section */
+
+// var { database } = include("databaseConnection");
+// const userCollection = database.db(mongodb_database).collection("w1users");
 
 var dbStore = new MongoDBStore({
   // uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
-  uri: `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_HOST}/${process.env.MONGODB_DATABASE}?retryWrites=true&w=majority`,
+  uri: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`,
   collection: 'mySessions'
 });
 
 
 // replace the in-memory array session store with a database session store
 app.use(session({
-  secret: 'the secret is sky color is blue ', // bad secret
+  secret: node_session_secret,
   store: dbStore,
   resave: false,
   saveUninitialized: false,
@@ -51,40 +62,13 @@ app.get('/login', (req, res) => {
 app.get("/signUp", (req, res) => {
   var html = `
   create user
-  <form action='/submitUser' method='POST'>
+  <form action='/signUp' method='post'>
     <input name='username' type='text' placeholder='username'>
+    <input name='email' type='email' placeholder='email'>
     <input name='password' type='password' placeholder='password'>
-    <button>Submit</button>
+    <input type="submit" value="Signup" />
   </form>
   `;
-  res.send(html);
-});
-
-app.post("/submitUser", async (req, res) => {
-  var username = req.body.username;
-  var password = req.body.password;
-
-  const schema = Joi.object({
-    username: Joi.string().alphanum().max(20).required(),
-    password: Joi.string().max(20).required(),
-  });
-
-  const validationResult = schema.validate({ username, password });
-  if (validationResult.error != null) {
-    console.log(validationResult.error);
-    res.redirect("/signUp");
-    return;
-  }
-
-  var hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  await userCollection.insertOne({
-    username: username,
-    password: hashedPassword,
-  });
-  console.log("Inserted user");
-
-  var html = "successfully created user";
   res.send(html);
 });
 
@@ -98,16 +82,19 @@ app.post('/login', async (req, res) => {
 
   // sanitize the input using Joi
 
+  var username = req.body.username;
+  var password = req.body.password;
+
   const schema = Joi.object({
-    password: Joi.string()
+    username: Joi.string().alphanum().max(20).required(),
+    password: Joi.string().max(20).required(),
   });
 
-  try {
-    const value = await schema.validateAsync({ password: req.body.password });  
-  } catch (error) {
-    console.log(error);
-    console.log("The password is not valid");
-    return
+  const validationResult = schema.validate({ username, password });
+  if (validationResult.error != null) {
+    console.log(validationResult.error);
+    res.redirect("/login");
+    return;
   }
 
   try {
@@ -119,10 +106,11 @@ app.post('/login', async (req, res) => {
       req.session.GLOBAL_AUTHENTICATED = true;
       req.session.loggedUsername = req.body.username;
       req.session.loggedPassword = req.body.password;
+      req.session.cookie.expires = new Date(Date.now() + expireTime);
       res.redirect('/members');
       console.log(GLOBAL_AUTHENTICATED);
     } else {
-      res.send(`wrong password
+      res.send(`wrong email/password
       <a href="/login">Try Again</a>`)
       
     }
@@ -131,6 +119,41 @@ app.post('/login', async (req, res) => {
     console.log(error);
   }
 
+});
+
+app.post("/signUp", async (req, res) => {
+  console.log("Submitting user");
+  var username = req.body.username;
+  var email = req.body.email;
+  var password = req.body.password;
+
+  const schema = Joi.object({
+    username: Joi.string().alphanum().max(20).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().max(20).required(),
+  });
+
+  const validationResult = schema.validate({ username, password });
+  if (validationResult.error != null) {
+    console.log(validationResult.error);
+    res.redirect("/signUp");
+    return;
+  }
+
+  var hashedPassword = await bcrypt.hash(password, saltRounds);
+  
+  console.log("Inserting user");
+  await usersModel.collection.insertOne({
+    username: username,
+    email: email,
+    password: hashedPassword,
+    type: "non-administrator"
+  });
+  console.log("Inserted user");
+
+  var html = "successfully created user";
+  res.send(html);
+  res.send(`<a href="/login">Login</a>`);
 });
 
 // only for authenticated users
@@ -150,7 +173,7 @@ app.get('/members', (req, res) => {
   const randomImageNumber = Math.floor(Math.random() * 9) + 1;
   const imageName = `00${randomImageNumber}.png`;
   HTMLResponse = `
-    <h1> Protected Route </h1>
+    <h1> Hello ${req.session.loggedUsername} </h1>
     <br>
     <img src="${imageName}" />
     <br>
