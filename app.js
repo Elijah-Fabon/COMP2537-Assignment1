@@ -3,6 +3,7 @@ const app = express();
 const session = require('express-session');
 const usersModel = require('./models/w1users');
 const bcrypt = require('bcrypt');
+const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * millis)
 
 var MongoDBStore = require('connect-mongodb-session')(session);
 
@@ -29,7 +30,8 @@ app.use(session({
 // public routes
 app.get('/', (req, res) => {
   res.send(`<h1> Hello World </h1>
-  <a href="/login">Login</a>`);
+  <a href="/login">Login</a>
+  <a href="/signUp">Sign Up</a>`);
 });
 
 
@@ -42,6 +44,18 @@ app.get('/login', (req, res) => {
     </form>
   `)
 
+});
+
+app.get("/signUp", (req, res) => {
+  var html = `
+  create user
+  <form action='/submitUser' method='POST'>
+    <input name='username' type='text' placeholder='username'>
+    <input name='password' type='password' placeholder='password'>
+    <button>Submit</button>
+  </form>
+  `;
+  res.send(html);
 });
 
 // GLOBAL_AUTHENTICATED = false;
@@ -107,8 +121,18 @@ app.get('/members', (req, res) => {
     <h1> Protected Route </h1>
     <br>
     <img src="${imageName}" />
+    <br>
+    <a href="/logout">Logout</a>
     `
   res.send(HTMLResponse);
+});
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  var html = `
+    You are logged out.
+    `;
+  res.send(html);
 });
 
 app.get('*', (req, res) => {
