@@ -51,7 +51,7 @@ app.get('/login', (req, res) => {
   res.send(`
     Login
     <form action="/login" method="post">
-      <input type="text" name="username" placeholder="Enter your username" />
+      <input name='email' type='email' placeholder='Enter your email'>
       <input type="password" name="password" placeholder="Enter your password" />
       <input type="submit" value="Login" />
     </form>
@@ -82,15 +82,15 @@ app.post('/login', async (req, res) => {
 
   // sanitize the input using Joi
 
-  var username = req.body.username;
+  var email = req.body.email;
   var password = req.body.password;
 
   const schema = Joi.object({
-    username: Joi.string().alphanum().max(20).required(),
+    email: Joi.string().email().required(),
     password: Joi.string().max(20).required(),
   });
 
-  const validationResult = schema.validate({ username, password });
+  const validationResult = schema.validate({ email, password });
   if (validationResult.error != null) {
     console.log(validationResult.error);
     res.redirect("/login");
@@ -99,12 +99,12 @@ app.post('/login', async (req, res) => {
 
   try {
     const result = await usersModel.findOne({
-      username: req.body.username
+      email: req.body.email
     })
 
     if (bcrypt.compareSync(req.body.password, result?.password)) {
       req.session.GLOBAL_AUTHENTICATED = true;
-      req.session.loggedUsername = req.body.username;
+      req.session.loggedUsername = result?.username;
       req.session.loggedPassword = req.body.password;
       req.session.cookie.expires = new Date(Date.now() + expireTime);
       res.redirect('/members');
@@ -133,17 +133,18 @@ app.post("/signUp", async (req, res) => {
     password: Joi.string().max(20).required(),
   });
 
-  const validationResult = schema.validate({ username, password });
+  const validationResult = schema.validate({ username, email, password });
   if (validationResult.error != null) {
     console.log(validationResult.error);
-    res.redirect("/signUp");
+    res.send(`Please enter valid information
+    <a href="/signUp">Try Again</a>`);
     return;
   }
 
   var hashedPassword = await bcrypt.hash(password, saltRounds);
 
   console.log("Inserting user");
-  await usersModel.create({
+  await usersModel.collection.insertOne({
     username: username,
     email: email,
     password: hashedPassword,
@@ -151,9 +152,8 @@ app.post("/signUp", async (req, res) => {
   });
   console.log("Inserted user");
 
-  var html = "successfully created user";
-  res.send(html);
-  res.send(`<a href="/login">Login</a>`);
+  res.send(`successfully created user
+  <a href="/login">Login</a>`);
 });
 
 // only for authenticated users
