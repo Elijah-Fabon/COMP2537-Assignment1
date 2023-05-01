@@ -141,9 +141,9 @@ app.post("/signUp", async (req, res) => {
   }
 
   var hashedPassword = await bcrypt.hash(password, saltRounds);
-  
+
   console.log("Inserting user");
-  await usersModel.collection.insertOne({
+  await usersModel.create({
     username: username,
     email: email,
     password: hashedPassword,
