@@ -75,6 +75,7 @@ app.post('/login', async (req, res) => {
       req.session.loggedUsername = req.body.username;
       req.session.loggedPassword = req.body.password;
       res.redirect('/members');
+      console.log(GLOBAL_AUTHENTICATED);
     } else {
       res.send('wrong password')
     }
@@ -84,13 +85,6 @@ app.post('/login', async (req, res) => {
   }
 
 });
-
-
-app.get('*', (req, res) => {
-  res.status(404).send('<h1> 404 Page not found</h1>');
-});
-
-
 
 // only for authenticated users
 const authenticatedOnly = (req, res, next) => {
@@ -116,8 +110,9 @@ app.get('/members', (req, res) => {
   res.send(HTMLResponse);
 });
 
-
-
+app.get('*', (req, res) => {
+  res.status(404).send('<h1> 404 Page not found</h1>');
+});
 
 // only for admins
 const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => {
