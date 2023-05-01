@@ -46,9 +46,25 @@ app.get('/login', (req, res) => {
 // GLOBAL_AUTHENTICATED = false;
 app.use(express.urlencoded({ extended: false }))
 // built-in middleware function in Express. It parses incoming requests with urlencoded payloads and is based on body-parser.
-
+const Joi = require('joi');
+app.use(express.json()) // built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
 app.post('/login', async (req, res) => {
   // set a global variable to true if the user is authenticated
+
+  // sanitize the input using Joi
+
+  const schema = Joi.object({
+    password: Joi.string()
+  });
+
+  try {
+    const value = await schema.validateAsync({ password: req.body.password });  
+  } catch (error) {
+    console.log(error);
+    console.log("The password is not valid");
+    return
+  }
+
   try {
     const result = await usersModel.findOne({
       username: req.body.username
@@ -58,7 +74,7 @@ app.post('/login', async (req, res) => {
       req.session.GLOBAL_AUTHENTICATED = true;
       req.session.loggedUsername = req.body.username;
       req.session.loggedPassword = req.body.password;
-      res.redirect('/protectedRoute');
+      res.redirect('/members');
     } else {
       res.send('wrong password')
     }
@@ -87,7 +103,7 @@ app.use(authenticatedOnly);
 
 app.use(express.static('public')) // built-in middleware function in Express. It serves static files and is based on serve-static.
 
-app.get('/protectedRoute', (req, res) => {
+app.get('/members', (req, res) => {
   // serve one of the three images randomly
   // generate a random number between 1 and 3
   const randomImageNumber = Math.floor(Math.random() * 3) + 1;
