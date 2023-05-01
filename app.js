@@ -28,7 +28,8 @@ app.use(session({
 
 // public routes
 app.get('/', (req, res) => {
-  res.send('<h1> Hello World </h1>');
+  res.send(`<h1> Hello World </h1>
+  <a href="/login">Login</a>`);
 });
 
 
@@ -100,7 +101,7 @@ app.use(express.static('public')) // built-in middleware function in Express. It
 app.get('/members', (req, res) => {
   // serve one of the three images randomly
   // generate a random number between 1 and 3
-  const randomImageNumber = Math.floor(Math.random() * 3) + 1;
+  const randomImageNumber = Math.floor(Math.random() * 9) + 1;
   const imageName = `00${randomImageNumber}.png`;
   HTMLResponse = `
     <h1> Protected Route </h1>
