@@ -122,7 +122,9 @@ app.post('/login', async (req, res) => {
       res.redirect('/members');
       console.log(GLOBAL_AUTHENTICATED);
     } else {
-      res.send('wrong password')
+      res.send(`wrong password
+      <a href="/login">Try Again</a>`)
+      
     }
 
   } catch (error) {
