@@ -3,7 +3,8 @@ const app = express();
 const session = require('express-session');
 const usersModel = require('./models/w1users');
 const bcrypt = require('bcrypt');
-const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * millis)
+const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * milliseconds)
+const saltRounds = 12;
 
 var MongoDBStore = require('connect-mongodb-session')(session);
 
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 
 app.get('/login', (req, res) => {
   res.send(`
+    Login
     <form action="/login" method="post">
       <input type="text" name="username" placeholder="Enter your username" />
       <input type="password" name="password" placeholder="Enter your password" />
@@ -55,6 +57,34 @@ app.get("/signUp", (req, res) => {
     <button>Submit</button>
   </form>
   `;
+  res.send(html);
+});
+
+app.post("/submitUser", async (req, res) => {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  const schema = Joi.object({
+    username: Joi.string().alphanum().max(20).required(),
+    password: Joi.string().max(20).required(),
+  });
+
+  const validationResult = schema.validate({ username, password });
+  if (validationResult.error != null) {
+    console.log(validationResult.error);
+    res.redirect("/signUp");
+    return;
+  }
+
+  var hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  await userCollection.insertOne({
+    username: username,
+    password: hashedPassword,
+  });
+  console.log("Inserted user");
+
+  var html = "successfully created user";
   res.send(html);
 });
 
@@ -104,7 +134,7 @@ app.post('/login', async (req, res) => {
 // only for authenticated users
 const authenticatedOnly = (req, res, next) => {
   if (!req.session.GLOBAL_AUTHENTICATED) {
-    return res.status(401).json({ error: 'not authenticated' });
+    res.redirect('/');
   }
   next(); // allow the next route to run
 };
@@ -131,6 +161,7 @@ app.get("/logout", (req, res) => {
   req.session.destroy();
   var html = `
     You are logged out.
+    <a href='/'>Home</a>
     `;
   res.send(html);
 });
