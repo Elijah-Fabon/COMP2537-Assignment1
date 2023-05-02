@@ -5,9 +5,9 @@ const usersModel = require('./models/w1users');
 const bcrypt = require('bcrypt');
 const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * milliseconds)
 const saltRounds = 12;
-let ejs = require('ejs');
+// let ejs = require('ejs');
 
-app.set('view engine', 'ejs');
+// app.set('view engine', 'ejs');
 
 var MongoDBStore = require('connect-mongodb-session')(session);
 
