@@ -38,12 +38,10 @@ app.use(session({
 // public routes
 app.get('/', (req, res) => {
   if (!req.session.GLOBAL_AUTHENTICATED) {
-    var html =`<h1> Hello World </h1>
-    <a href="/login">Login</a>
+    var html =`<a href="/login">Login</a>
     <a href="/signUp">Sign Up</a>`;
   } else {
-    var html =`<h1> Hello World </h1>
-    <a href="/members">Members</a>
+    var html =`<a href="/members">Members</a>
     <a href="/logout">Logout</a>`;
   }
   res.send(html);
