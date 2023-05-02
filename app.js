@@ -36,7 +36,7 @@ app.use(session({
   secret: node_session_secret,
   store: dbStore,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
 }));
 
 // public routes
