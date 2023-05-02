@@ -3,7 +3,7 @@ const app = express();
 const session = require('express-session');
 const usersModel = require('./models/w1users');
 const bcrypt = require('bcrypt');
-const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * milliseconds)
+const expireTime = 1 * 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * milliseconds)
 const saltRounds = 12;
 
 var MongoDBStore = require('connect-mongodb-session')(session);
@@ -36,7 +36,7 @@ app.use(session({
   secret: node_session_secret,
   store: dbStore,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
 }));
 
 // public routes
@@ -167,7 +167,6 @@ app.post("/signUp", async (req, res) => {
       req.session.loggedPassword = req.body.password;
       req.session.cookie.expires = new Date(Date.now() + expireTime);
       res.redirect('/members');
-      console.log(GLOBAL_AUTHENTICATED);
   } catch (error) {
     console.log(error);
   }
@@ -208,10 +207,6 @@ app.get("/logout", (req, res) => {
   res.send(html);
 });
 
-app.get('*', (req, res) => {
-  res.status(404).send('<h1> 404 Page not found</h1>');
-});
-
 // only for admins
 const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => {
   try {
@@ -231,7 +226,9 @@ app.get('/protectedRouteForAdminsOnly', (req, res) => {
   res.send('<h1> protectedRouteForAdminsOnly </h1>');
 });
 
-
+app.get('*', (req, res) => {
+  res.status(404).send('<h1> 404 Page not found</h1>');
+});
 
 
 
