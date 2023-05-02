@@ -5,9 +5,6 @@ const usersModel = require('./models/w1users');
 const bcrypt = require('bcrypt');
 const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * milliseconds)
 const saltRounds = 12;
-// let ejs = require('ejs');
-
-// app.set('view engine', 'ejs');
 
 var MongoDBStore = require('connect-mongodb-session')(session);
 
@@ -24,15 +21,11 @@ const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 /* END secret section */
 
-// var { database } = include("databaseConnection");
-// const userCollection = database.db(mongodb_database).collection("w1users");
-
 var dbStore = new MongoDBStore({
   // uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
   uri: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`,
   collection: 'mySessions'
 });
-
 
 // replace the in-memory array session store with a database session store
 app.use(session({
@@ -203,10 +196,6 @@ app.get('/members', (req, res) => {
     <a href="/logout">Logout</a>
     `
   res.send(HTMLResponse);
-  // res.render(`protectedroute.ejs`, { 
-  //   "x": req.session.loggedUsername, 
-  //   "y": imageName 
-  // })
 });
 
 app.get("/logout", (req, res) => {
