@@ -206,7 +206,7 @@ app.get("/logout", (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.status(404).send('<h1> 404 Page not found</h1>');
+  res.status(404).send('404 Page not found');
 });
 
 // only for admins
