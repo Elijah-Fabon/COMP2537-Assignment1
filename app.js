@@ -5,6 +5,9 @@ const usersModel = require('./models/w1users');
 const bcrypt = require('bcrypt');
 const expireTime = 60 * 60 * 1000; //expires after 1 hour  (minutes * seconds * milliseconds)
 const saltRounds = 12;
+let ejs = require('ejs');
+
+app.set('view engine', 'ejs');
 
 var MongoDBStore = require('connect-mongodb-session')(session);
 
@@ -152,8 +155,21 @@ app.post("/signUp", async (req, res) => {
   });
   console.log("Inserted user");
 
-  res.send(`successfully created user
-  <a href="/login">Login</a>`);
+  try {
+    const result = await usersModel.findOne({
+      email: req.body.email
+    })
+    
+      req.session.GLOBAL_AUTHENTICATED = true;
+      req.session.loggedUsername = result?.username;
+      req.session.loggedPassword = req.body.password;
+      req.session.cookie.expires = new Date(Date.now() + expireTime);
+      res.redirect('/members');
+
+  } catch (error) {
+    console.log(error);
+  }
+
 });
 
 // only for authenticated users
@@ -180,6 +196,10 @@ app.get('/members', (req, res) => {
     <a href="/logout">Logout</a>
     `
   res.send(HTMLResponse);
+  // res.render(`protectedroute.ejs`, { 
+  //   "x": req.session.loggedUsername, 
+  //   "y": imageName 
+  // })
 });
 
 app.get("/logout", (req, res) => {
@@ -189,10 +209,6 @@ app.get("/logout", (req, res) => {
     <a href='/'>Home</a>
     `;
   res.send(html);
-});
-
-app.get('*', (req, res) => {
-  res.status(404).send('<h1> 404 Page not found</h1>');
 });
 
 // only for admins
