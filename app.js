@@ -47,8 +47,8 @@ app.get('/', (req, res) => {
   <a href="/signUp">Sign Up</a>`);
   } else {
     res.send(`<h1> Hello World </h1>
-    <a href="/login">Login</a>
-    <a href="/signUp">Sign Up</a>`);
+    <a href="/members">Members</a>
+    <a href="/logout">Logout</a>`);
   }
 });
 
