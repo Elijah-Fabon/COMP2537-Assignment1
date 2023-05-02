@@ -21,11 +21,15 @@ const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 /* END secret section */
 
+// var { database } = include("databaseConnection");
+// const userCollection = database.db(mongodb_database).collection("w1users");
+
 var dbStore = new MongoDBStore({
   // uri: 'mongodb://localhost:27017/connect_mongodb_session_test',
   uri: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`,
   collection: 'mySessions'
 });
+
 
 // replace the in-memory array session store with a database session store
 app.use(session({
@@ -38,13 +42,14 @@ app.use(session({
 // public routes
 app.get('/', (req, res) => {
   if (!req.session.GLOBAL_AUTHENTICATED) {
-    var html =`<a href="/login">Login</a>
-    <a href="/signUp">Sign Up</a>`;
+    res.send(`<h1> Hello World </h1>
+  <a href="/login">Login</a>
+  <a href="/signUp">Sign Up</a>`);
   } else {
-    var html =`<a href="/members">Members</a>
-    <a href="/logout">Logout</a>`;
+    res.send(`<h1> Hello World </h1>
+    <a href="/login">Login</a>
+    <a href="/signUp">Sign Up</a>`);
   }
-  res.send(html);
 });
 
 
@@ -157,17 +162,15 @@ app.post("/signUp", async (req, res) => {
     const result = await usersModel.findOne({
       email: req.body.email
     })
-    
       req.session.GLOBAL_AUTHENTICATED = true;
       req.session.loggedUsername = result?.username;
       req.session.loggedPassword = req.body.password;
       req.session.cookie.expires = new Date(Date.now() + expireTime);
       res.redirect('/members');
-
+      console.log(GLOBAL_AUTHENTICATED);
   } catch (error) {
     console.log(error);
   }
-
 });
 
 // only for authenticated users
@@ -203,10 +206,6 @@ app.get("/logout", (req, res) => {
     <a href='/'>Home</a>
     `;
   res.send(html);
-});
-
-app.get('*', (req, res) => {
-  res.status(404).send('404 Page not found');
 });
 
 // only for admins
