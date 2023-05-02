@@ -208,6 +208,10 @@ app.get("/logout", (req, res) => {
   res.send(html);
 });
 
+app.get('*', (req, res) => {
+  res.status(404).send('<h1> 404 Page not found</h1>');
+});
+
 // only for admins
 const protectedRouteForAdminsOnlyMiddlewareFunction = async (req, res, next) => {
   try {
@@ -227,9 +231,6 @@ app.get('/protectedRouteForAdminsOnly', (req, res) => {
   res.send('<h1> protectedRouteForAdminsOnly </h1>');
 });
 
-app.get('*', (req, res) => {
-  res.status(404).send('<h1> 404 Page not found</h1>');
-});
 
 
 
